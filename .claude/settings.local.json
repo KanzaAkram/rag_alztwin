@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(curl -s -H \"User-Agent: Mozilla/5.0\" \"https://clinicaltrials.gov/api/v2/studies?query.cond=Alzheimer+Disease&query.term=donepezil&pageSize=1&format=json&fields=NCTId,BriefTitle\")",
+      "Bash(curl *)"
+    ]
+  }
+}

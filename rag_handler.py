@@ -17,7 +17,7 @@ import re
 from azure.core.credentials import AzureKeyCredential
 from azure.search.documents import SearchClient
 from azure.search.documents.models import VectorizedQuery
-from openai import AzureOpenAI
+from openai import AzureOpenAI, OpenAI
 from tenacity import retry, stop_after_attempt, wait_exponential
 
 from models import (
@@ -36,19 +36,30 @@ logger = logging.getLogger(__name__)
 
 # ── Clients (module-level singletons — reused across warm invocations) ────────
 
-_openai_client: AzureOpenAI | None = None
+_embedding_client: AzureOpenAI | None = None
+_chat_client: OpenAI | None = None
 _search_client: SearchClient | None = None
 
 
-def _get_openai_client() -> AzureOpenAI:
-    global _openai_client
-    if _openai_client is None:
-        _openai_client = AzureOpenAI(
-            azure_endpoint=os.environ["AZURE_OPENAI_ENDPOINT"],
-            api_key=os.environ["AZURE_OPENAI_API_KEY"],
-            api_version=os.environ.get("AZURE_OPENAI_API_VERSION", "2024-02-01"),
+def _get_embedding_client() -> AzureOpenAI:
+    global _embedding_client
+    if _embedding_client is None:
+        _embedding_client = AzureOpenAI(
+            azure_endpoint=os.environ["AZURE_OPENAI_EMBEDDING_ENDPOINT"],
+            api_key=os.environ["AZURE_OPENAI_EMBEDDING_API_KEY"],
+            api_version=os.environ.get("AZURE_OPENAI_EMBEDDING_API_VERSION", "2024-12-01-preview"),
         )
-    return _openai_client
+    return _embedding_client
+
+
+def _get_chat_client() -> OpenAI:
+    global _chat_client
+    if _chat_client is None:
+        _chat_client = OpenAI(
+            base_url=os.environ["AZURE_OPENAI_CHAT_ENDPOINT"],
+            api_key=os.environ["AZURE_OPENAI_CHAT_API_KEY"],
+        )
+    return _chat_client
 
 
 def _get_search_client() -> SearchClient:
@@ -66,10 +77,10 @@ def _get_search_client() -> SearchClient:
 
 @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=1, max=8))
 def _embed_query(text: str) -> list[float]:
-    client = _get_openai_client()
+    client = _get_embedding_client()
     response = client.embeddings.create(
         input=text,
-        model=os.environ.get("AZURE_OPENAI_EMBEDDING_DEPLOYMENT", "text-embedding-3-large"),
+        model=os.environ.get("AZURE_OPENAI_EMBEDDING_DEPLOYMENT_NEW", "text-embedding-3-small"),
     )
     return response.data[0].embedding
 
@@ -156,9 +167,9 @@ def _build_context_string(chunks: list[dict]) -> str:
 
 @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=2, max=15))
 def _call_gpt4o(system_prompt: str, user_message: str) -> str:
-    client = _get_openai_client()
+    client = _get_chat_client()
     response = client.chat.completions.create(
-        model=os.environ.get("AZURE_OPENAI_CHAT_DEPLOYMENT", "gpt-4o"),
+        model=os.environ.get("AZURE_OPENAI_CHAT_DEPLOYMENT_NEW", "gpt-oss-120b"),
         messages=[
             {"role": "system", "content": system_prompt},
             {"role": "user",   "content": user_message},

@@ -1,0 +1,30 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "FUNCTIONS_WORKER_RUNTIME": "python",
+    "FUNCTIONS_ENVIRONMENT": "Development",
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+
+    "AZURE_OPENAI_ENDPOINT": "https://alztwinopenai.openai.azure.com/",
+    "AZURE_OPENAI_API_KEY": "CyFwSRLDfYYLZ0k4VWYoH68UMb6TZoNzg9F4DxNZtIKfOOAU7VJUJQQJ99CDACqBBLyXJ3w3AAABACOGBXRT",
+    "AZURE_OPENAI_API_VERSION": "2024-02-01",
+    "AZURE_OPENAI_EMBEDDING_DEPLOYMENT": "text-embedding-3-large",
+    "AZURE_OPENAI_CHAT_DEPLOYMENT": "gpt-4o",
+
+    "AZURE_SEARCH_ENDPOINT": "https://srchalztwinproto.search.windows.net",
+    "AZURE_SEARCH_ADMIN_KEY": "V7n7fYZw39u9bRi5cpt6XQfCWo84CBG9N02kM507laAzSeDD4iqL",
+    "AZURE_SEARCH_QUERY_KEY": "40lgHuF9BD7uXwNMx4E1GmQp8SexjISo8rkGx72qHlAzSeBhevfx",
+    "AZURE_SEARCH_INDEX_NAME": "alzheimer-trials",
+
+    "AZURE_OPENAI_EMBEDDING_ENDPOINT": "https://yusra-mo0c0xs5-uaenorth.cognitiveservices.azure.com/",
+    "AZURE_OPENAI_EMBEDDING_API_KEY": "ACeSiwmlvsg7gl7MwrDbV32B3sUp1lfJXazllt22b35AcVHKocDGJQQJ99CDACF24PCXJ3w3AAAAACOGwnXz",
+    "AZURE_OPENAI_EMBEDDING_API_VERSION": "2024-12-01-preview",
+    "AZURE_OPENAI_EMBEDDING_MODEL": "text-embedding-3-small",
+    "AZURE_OPENAI_EMBEDDING_DEPLOYMENT_NEW": "text-embedding-3-small",
+
+    "AZURE_OPENAI_CHAT_ENDPOINT": "https://yusra-mo0c0xs5-uaenorth.services.ai.azure.com/openai/v1/",
+    "AZURE_OPENAI_CHAT_API_KEY": "ACeSiwmlvsg7gl7MwrDbV32B3sUp1lfJXazllt22b35AcVHKocDGJQQJ99CDACF24PCXJ3w3AAAAACOGwnXz",
+    "AZURE_OPENAI_CHAT_MODEL": "gpt-oss-120B",
+    "AZURE_OPENAI_CHAT_DEPLOYMENT_NEW": "gpt-oss-120b"
+  }
+}

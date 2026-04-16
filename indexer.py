@@ -48,15 +48,15 @@ logger = logging.getLogger(__name__)
 SEARCH_ENDPOINT  = os.environ["AZURE_SEARCH_ENDPOINT"]
 SEARCH_ADMIN_KEY = os.environ["AZURE_SEARCH_ADMIN_KEY"]
 INDEX_NAME       = os.environ.get("AZURE_SEARCH_INDEX_NAME", "alzheimer-trials")
-EMBEDDING_MODEL  = os.environ.get("AZURE_OPENAI_EMBEDDING_DEPLOYMENT", "text-embedding-3-large")
-EMBEDDING_DIMS   = 3072   # text-embedding-3-large output size
+EMBEDDING_MODEL  = os.environ.get("AZURE_OPENAI_EMBEDDING_DEPLOYMENT_NEW", "text-embedding-3-small")
+EMBEDDING_DIMS   = 1536   # text-embedding-3-small output size
 BATCH_SIZE       = 16     # documents per embedding API call
 UPLOAD_BATCH     = 100    # documents per Search upload batch
 
 openai_client = AzureOpenAI(
-    azure_endpoint = os.environ["AZURE_OPENAI_ENDPOINT"],
-    api_key        = os.environ["AZURE_OPENAI_API_KEY"],
-    api_version    = os.environ.get("AZURE_OPENAI_API_VERSION", "2024-02-01"),
+    azure_endpoint = os.environ["AZURE_OPENAI_EMBEDDING_ENDPOINT"],
+    api_key        = os.environ["AZURE_OPENAI_EMBEDDING_API_KEY"],
+    api_version    = os.environ.get("AZURE_OPENAI_EMBEDDING_API_VERSION", "2024-12-01-preview"),
 )
 
 
@@ -112,9 +112,28 @@ def create_or_update_index() -> None:
         endpoint=SEARCH_ENDPOINT,
         credential=AzureKeyCredential(SEARCH_ADMIN_KEY),
     )
+
+    # Vector dims are immutable on an existing index. If the dims changed
+    # (e.g. switching embedding models), delete and recreate.
+    try:
+        existing = client.get_index(INDEX_NAME)
+        existing_dims = next(
+            (f.vector_search_dimensions for f in existing.fields
+             if f.name == "content_vector"),
+            None,
+        )
+        if existing_dims and existing_dims != EMBEDDING_DIMS:
+            logger.warning(
+                f"Index '{INDEX_NAME}' has dims={existing_dims}, "
+                f"need {EMBEDDING_DIMS}. Deleting and recreating."
+            )
+            client.delete_index(INDEX_NAME)
+    except Exception as e:
+        logger.info(f"No existing index to check ({e.__class__.__name__}); creating fresh.")
+
     index = _build_index()
     result = client.create_or_update_index(index)
-    logger.info(f"Index '{result.name}' ready")
+    logger.info(f"Index '{result.name}' ready (dims={EMBEDDING_DIMS})")
 
 
 # ── Embedding ─────────────────────────────────────────────────────────────────
